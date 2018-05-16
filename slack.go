@@ -31,8 +31,9 @@ type DirectMessageReceivedHandlerFn func(*Oddsy, *Message)
 
 // Configuration holds configuration value
 type Configuration struct {
-	SlackToken string `json:"slack-token"`
-	Debug      bool   `json:"debug"`
+	SlackToken       string `json:"slack-token"`
+	Debug            bool   `json:"debug"`
+	IgnoreBotMessage bool   `json:"ignore-bot-message"`
 }
 
 // NewOddsy to create new oddsy
@@ -68,6 +69,12 @@ func (o *Oddsy) WhoIs(id string) (u *slack.User, e error) {
 	return
 }
 
+// WhatBot get bot profile
+func (o *Oddsy) WhatBot(id string) (b *slack.Bot, e error) {
+	b, e = o.api.GetBotInfo(id)
+	return
+}
+
 // WhereIs get channel profile
 func (o *Oddsy) WhereIs(id string) (c *slack.Channel, e error) {
 	c, e = o.api.GetChannelInfo(id)
@@ -79,6 +86,14 @@ func (o *Oddsy) WhoAmI() (id string, name string) {
 	id = o.uid
 	name = o.name
 	return
+}
+
+// Send message
+func (o *Oddsy) Send(chanID, msg string) {
+	_, _, e := o.api.PostMessage(chanID, msg, slack.PostMessageParameters{})
+	if e != nil {
+		o.logger.Printf("%s\n", e)
+	}
 }
 
 // Start service
@@ -102,11 +117,13 @@ func (o *Oddsy) Start() {
 
 		case *slack.MessageEvent:
 			m := NewMessage(o, ev)
-			if o.mrFn != nil && m.Type == PublicType {
-				o.mrFn(o, m)
-			} else {
-				if o.dmrFn != nil && m.Type == DirectType {
-					o.dmrFn(o, m)
+			if !m.IsBotMessage || (m.IsBotMessage && !o.conf.IgnoreBotMessage) {
+				if o.mrFn != nil && m.Type == PublicType {
+					o.mrFn(o, m)
+				} else {
+					if o.dmrFn != nil && m.Type == DirectType {
+						o.dmrFn(o, m)
+					}
 				}
 			}
 
