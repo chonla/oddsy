@@ -16,6 +16,7 @@ type Oddsy struct {
 	api    *slack.Client
 	logger *log.Logger
 	rtm    *slack.RTM
+	token  string
 	uid    string
 	name   string
 	mrFn   MessageReceivedHandlerFn
@@ -39,8 +40,16 @@ func NewOddsy(confName string) *Oddsy {
 	conf := &Configuration{}
 	loadConfig(confName, conf)
 	return &Oddsy{
-		conf: conf,
+		conf:   conf,
+		logger: log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags),
+		token:  conf.SlackToken,
 	}
+}
+
+// SetToken to override token in configuration
+func (o *Oddsy) SetToken(t string) {
+	o.token = t
+	o.logger.Println("Slack token is overwritten by environment variable.")
 }
 
 // MessageReceived hook
@@ -74,8 +83,7 @@ func (o *Oddsy) WhoAmI() (id string, name string) {
 
 // Start service
 func (o *Oddsy) Start() {
-	o.api = slack.New(o.conf.SlackToken)
-	o.logger = log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)
+	o.api = slack.New(o.token)
 	slack.SetLogger(o.logger)
 	o.api.SetDebug(o.conf.Debug)
 
