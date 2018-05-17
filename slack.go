@@ -19,7 +19,7 @@ type Oddsy struct {
 	rtm    *slack.RTM
 	token  string
 	uid    string
-	name   string
+	Name   string
 	mrFn   MessageReceivedHandlerFn
 	dmrFn  DirectMessageReceivedHandlerFn
 	tmrFn  map[string]FirstStringTokenReceivedHandlerFn
@@ -103,7 +103,7 @@ func (o *Oddsy) WhereIs(id string) (c *slack.Channel, e error) {
 // WhoAmI get bot profile
 func (o *Oddsy) WhoAmI() (id string, name string) {
 	id = o.uid
-	name = o.name
+	name = o.Name
 	return
 }
 
@@ -132,7 +132,7 @@ func (o *Oddsy) Start() {
 
 		case *slack.ConnectedEvent:
 			o.uid = ev.Info.User.ID
-			o.name = ev.Info.User.Name
+			o.Name = ev.Info.User.Name
 
 		case *slack.MessageEvent:
 			m := NewMessage(o, ev)
