@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/nlopes/slack"
 )
@@ -21,6 +22,7 @@ type Oddsy struct {
 	name   string
 	mrFn   MessageReceivedHandlerFn
 	dmrFn  DirectMessageReceivedHandlerFn
+	tmrFn  map[string]FirstStringTokenReceivedHandlerFn
 }
 
 // MessageReceivedHandlerFn is message received handler function
@@ -28,6 +30,9 @@ type MessageReceivedHandlerFn func(*Oddsy, *Message)
 
 // DirectMessageReceivedHandlerFn is direct message received handler function
 type DirectMessageReceivedHandlerFn func(*Oddsy, *Message)
+
+// FirstStringTokenReceivedHandlerFn is message received with predefined first token handler function
+type FirstStringTokenReceivedHandlerFn func(*Oddsy, *Message)
 
 // Configuration holds configuration value
 type Configuration struct {
@@ -45,6 +50,7 @@ func NewOddsy(confName string) *Oddsy {
 		conf:   conf,
 		logger: log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags),
 		token:  conf.SlackToken,
+		tmrFn:  map[string]FirstStringTokenReceivedHandlerFn{},
 	}
 
 	envSlackToken := os.Getenv("SLACK_BOT")
@@ -69,6 +75,11 @@ func (o *Oddsy) MessageReceived(h MessageReceivedHandlerFn) {
 // DirectMessageReceived hook
 func (o *Oddsy) DirectMessageReceived(h DirectMessageReceivedHandlerFn) {
 	o.dmrFn = h
+}
+
+// FirstStringTokenReceived hook
+func (o *Oddsy) FirstStringTokenReceived(t string, h FirstStringTokenReceivedHandlerFn) {
+	o.tmrFn[t] = h
 }
 
 // WhoIs get user profile
@@ -129,8 +140,15 @@ func (o *Oddsy) Start() {
 				if o.mrFn != nil && m.Type == PublicType {
 					o.mrFn(o, m)
 				} else {
-					if o.dmrFn != nil && m.Type == DirectType {
-						o.dmrFn(o, m)
+					ft := o.firstToken(m.Message)
+
+					if v, ok := o.tmrFn[ft]; ok && m.Type == DirectType {
+						m.Message = o.nextToken(m.Message)
+						v(o, m)
+					} else {
+						if o.dmrFn != nil && m.Type == DirectType {
+							o.dmrFn(o, m)
+						}
 					}
 				}
 			}
@@ -164,4 +182,18 @@ func loadConfig(filename string, conf *Configuration) {
 	}
 
 	json.Unmarshal(t, conf)
+}
+
+func (o *Oddsy) firstToken(t string) (r string) {
+	l := strings.SplitN(t, " ", 2)
+	r = l[0]
+	return
+}
+
+func (o *Oddsy) nextToken(t string) (r string) {
+	l := strings.SplitN(t, " ", 2)
+	if len(l) > 0 {
+		r = l[1]
+	}
+	return
 }
