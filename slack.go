@@ -40,11 +40,19 @@ type Configuration struct {
 func NewOddsy(confName string) *Oddsy {
 	conf := &Configuration{}
 	loadConfig(confName, conf)
-	return &Oddsy{
+
+	o := &Oddsy{
 		conf:   conf,
 		logger: log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags),
 		token:  conf.SlackToken,
 	}
+
+	envSlackToken := os.Getenv("SLACK_BOT")
+	if envSlackToken != "" {
+		o.SetToken(envSlackToken)
+	}
+
+	return o
 }
 
 // SetToken to override token in configuration
