@@ -109,7 +109,7 @@ func (o *Oddsy) WhoAmI() (id string, name string) {
 
 // Send message
 func (o *Oddsy) Send(chanID, msg string) {
-	_, _, e := o.api.PostMessage(chanID, msg, slack.PostMessageParameters{})
+	_, _, e := o.api.PostMessage(chanID, msg, slack.PostMessageParameters{Markdown: true})
 	if e != nil {
 		o.logger.Printf("%s\n", e)
 	}
