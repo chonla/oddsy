@@ -53,7 +53,7 @@ func NewOddsy(confName string) *Oddsy {
 		tmrFn:  map[string]FirstStringTokenReceivedHandlerFn{},
 	}
 
-	envSlackToken := os.Getenv("SLACK_BOT")
+	envSlackToken := os.Getenv("SLACK_TOKEN")
 	if envSlackToken != "" {
 		o.SetToken(envSlackToken)
 	}
