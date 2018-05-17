@@ -135,11 +135,17 @@ func (o *Oddsy) Start() {
 				if o.mrFn != nil && m.Type == PublicType {
 					o.mrFn(o, m)
 				} else {
-					ft := o.firstToken(m.Message)
+					if len(o.tmrFn) > 0 {
+						ft := o.firstToken(m.Message)
 
-					if v, ok := o.tmrFn[ft]; ok && m.Type == DirectType {
-						m.Message = o.nextToken(m.Message)
-						v(o, m)
+						if v, ok := o.tmrFn[ft]; ok && m.Type == DirectType {
+							m.Message = o.nextToken(m.Message)
+							v(o, m)
+						} else {
+							if o.dmrFn != nil && m.Type == DirectType {
+								o.dmrFn(o, m)
+							}
+						}
 					} else {
 						if o.dmrFn != nil && m.Type == DirectType {
 							o.dmrFn(o, m)
