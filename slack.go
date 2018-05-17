@@ -192,7 +192,7 @@ func (o *Oddsy) firstToken(t string) (r string) {
 
 func (o *Oddsy) nextToken(t string) (r string) {
 	l := strings.SplitN(t, " ", 2)
-	if len(l) > 0 {
+	if len(l) > 1 {
 		r = l[1]
 	}
 	return
