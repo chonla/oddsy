@@ -34,9 +34,9 @@ type FirstStringTokenReceivedHandlerFn func(*Oddsy, *Message)
 
 // Configuration holds configuration value
 type Configuration struct {
-	SlackToken       string `json:"slack-token"`
-	Debug            bool   `json:"debug"`
-	IgnoreBotMessage bool   `json:"ignore-bot-message"`
+	SlackToken       string
+	Debug            bool
+	IgnoreBotMessage bool
 }
 
 // NewOddsy to create new oddsy
