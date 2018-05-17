@@ -1,9 +1,7 @@
 package oddsy
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -42,10 +40,7 @@ type Configuration struct {
 }
 
 // NewOddsy to create new oddsy
-func NewOddsy(confName string) *Oddsy {
-	conf := &Configuration{}
-	loadConfig(confName, conf)
-
+func NewOddsy(conf *Configuration) *Oddsy {
 	o := &Oddsy{
 		conf:   conf,
 		logger: log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags),
@@ -172,16 +167,6 @@ func (o *Oddsy) Start() {
 			// fmt.Printf("Unexpected: %v\n", msg.Data)
 		}
 	}
-}
-
-func loadConfig(filename string, conf *Configuration) {
-	t, e := ioutil.ReadFile(filename)
-	if e != nil {
-		fmt.Println(e.Error())
-		os.Exit(1)
-	}
-
-	json.Unmarshal(t, conf)
 }
 
 func (o *Oddsy) firstToken(t string) (r string) {
