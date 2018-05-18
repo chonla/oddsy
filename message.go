@@ -43,10 +43,11 @@ func NewMessage(o *Oddsy, ev *slack.MessageEvent) *Message {
 			uName = b.Name
 		}
 	} else {
-		u, e := o.WhoIs(ev.User)
-		if e != nil {
-			uName = u.Name
-		}
+		uName = ev.Name
+		// u, e := o.WhoIs(ev.User)
+		// if e != nil {
+		// 	uName = u.Name
+		// }
 	}
 	mentions := getMentionList(o, ev.Text)
 	mentioned := isMentioned(o.uid, mentions)
