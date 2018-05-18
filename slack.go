@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/chonla/rnd"
 	"github.com/nlopes/slack"
 )
 
@@ -104,7 +105,38 @@ func (o *Oddsy) WhoAmI() (id string, name string) {
 
 // Send message
 func (o *Oddsy) Send(chanID, msg string) {
-	_, _, e := o.api.PostMessage(chanID, msg, slack.PostMessageParameters{Markdown: true})
+	params := slack.PostMessageParameters{
+		Markdown: true,
+	}
+	_, _, e := o.api.PostMessage(chanID, msg, params)
+	if e != nil {
+		o.logger.Printf("%s\n", e)
+	}
+}
+
+// SendSelection message
+func (o *Oddsy) SendSelection(chanID, msg string, submsg string, options []*SelectionOption) {
+	attch := slack.Attachment{
+		Text:       submsg,
+		CallbackID: "tik-selections-" + rnd.Alphanum(10),
+		Actions:    []slack.AttachmentAction{},
+	}
+
+	for i, n := 0, len(options); i < n; i++ {
+		attch.Actions = append(attch.Actions, slack.AttachmentAction{
+			Name:  options[i].Label,
+			Text:  options[i].Label,
+			Value: options[i].Value,
+			Type:  "button",
+		})
+	}
+
+	params := slack.PostMessageParameters{
+		Markdown:    true,
+		Attachments: []slack.Attachment{attch},
+	}
+
+	_, _, e := o.api.PostMessage(chanID, msg, params)
 	if e != nil {
 		o.logger.Printf("%s\n", e)
 	}
