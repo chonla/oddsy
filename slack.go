@@ -114,8 +114,34 @@ func (o *Oddsy) Send(chanID, msg string) {
 	}
 }
 
+// SendFields message
+func (o *Oddsy) SendFields(chanID, msg, submsg string, values []*Field) {
+	attch := slack.Attachment{
+		Text:   submsg,
+		Fields: []slack.AttachmentField{},
+	}
+
+	for i, n := 0, len(values); i < n; i++ {
+		attch.Fields = append(attch.Fields, slack.AttachmentField{
+			Title: values[i].Label,
+			Value: values[i].Value,
+			Short: true,
+		})
+	}
+
+	params := slack.PostMessageParameters{
+		Markdown:    true,
+		Attachments: []slack.Attachment{attch},
+	}
+
+	_, _, e := o.api.PostMessage(chanID, msg, params)
+	if e != nil {
+		o.logger.Printf("%s\n", e)
+	}
+}
+
 // SendSelection message
-func (o *Oddsy) SendSelection(chanID, msg string, submsg string, options []*SelectionOption) {
+func (o *Oddsy) SendSelection(chanID, msg, submsg string, options []*SelectionOption) {
 	attch := slack.Attachment{
 		Text:       submsg,
 		CallbackID: "tik-selections-" + rnd.Alphanum(10),
