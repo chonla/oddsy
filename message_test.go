@@ -33,3 +33,17 @@ func TestShouldReturnPublicTypeWhenMessageIsChannelMessage(t *testing.T) {
 		t.Errorf("expecting result to be %v but %v\n", PublicType, result)
 	}
 }
+
+func TestShouldReturnUnknownTypeWhenMessageIsUnexpected(t *testing.T) {
+	ev := &slack.MessageEvent{
+		Msg: slack.Msg{
+			Channel: "Q000000",
+		},
+	}
+
+	result := getMessageType(ev)
+
+	if result != UnknownType {
+		t.Errorf("expecting result to be %v but %v\n", UnknownType, result)
+	}
+}
