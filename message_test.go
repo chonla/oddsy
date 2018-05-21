@@ -6,7 +6,7 @@ import (
 	"github.com/nlopes/slack"
 )
 
-func TestGetMessageTypeOfDirectMessage(t *testing.T) {
+func TestShouldReturnDirectTypeWhenMessageIsDirectMessage(t *testing.T) {
 	ev := &slack.MessageEvent{
 		Msg: slack.Msg{
 			Channel: "D000000",
@@ -17,5 +17,19 @@ func TestGetMessageTypeOfDirectMessage(t *testing.T) {
 
 	if result != DirectType {
 		t.Errorf("expecting result to be %v but %v\n", DirectType, result)
+	}
+}
+
+func TestShouldReturnPublicTypeWhenMessageIsChannelMessage(t *testing.T) {
+	ev := &slack.MessageEvent{
+		Msg: slack.Msg{
+			Channel: "C000000",
+		},
+	}
+
+	result := getMessageType(ev)
+
+	if result != PublicType {
+		t.Errorf("expecting result to be %v but %v\n", PublicType, result)
 	}
 }
