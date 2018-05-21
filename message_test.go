@@ -16,7 +16,7 @@ func TestShouldReturnDirectTypeWhenMessageIsDirectMessage(t *testing.T) {
 	result := getMessageType(ev)
 
 	if result != DirectType {
-		t.Errorf("expecting result to be %v but %v\n", DirectType, result)
+		t.Errorf("expecting result to be %v but %v", DirectType, result)
 	}
 }
 
@@ -30,7 +30,7 @@ func TestShouldReturnPublicTypeWhenMessageIsChannelMessage(t *testing.T) {
 	result := getMessageType(ev)
 
 	if result != PublicType {
-		t.Errorf("expecting result to be %v but %v\n", PublicType, result)
+		t.Errorf("expecting result to be %v but %v", PublicType, result)
 	}
 }
 
@@ -44,6 +44,46 @@ func TestShouldReturnUnknownTypeWhenMessageIsUnexpected(t *testing.T) {
 	result := getMessageType(ev)
 
 	if result != UnknownType {
-		t.Errorf("expecting result to be %v but %v\n", UnknownType, result)
+		t.Errorf("expecting result to be %v but %v", UnknownType, result)
+	}
+}
+
+func TestShouldReturnTrueIfUIDIsFoundInMentionList(t *testing.T) {
+	mentionList := []Identity{
+		Identity{
+			UID: "U1",
+		},
+		Identity{
+			UID: "U2",
+		},
+		Identity{
+			UID: "U3",
+		},
+	}
+
+	result := isMentioned("U2", mentionList)
+
+	if !result {
+		t.Error("expecting result to be true but false")
+	}
+}
+
+func TestShouldReturnFalseIfUIDIsNotFoundInMentionList(t *testing.T) {
+	mentionList := []Identity{
+		Identity{
+			UID: "U1",
+		},
+		Identity{
+			UID: "U2",
+		},
+		Identity{
+			UID: "U3",
+		},
+	}
+
+	result := isMentioned("U4", mentionList)
+
+	if result {
+		t.Error("expecting result to be false but true")
 	}
 }
