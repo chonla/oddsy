@@ -77,6 +77,12 @@ func NewMessage(o I, ev *slack.MessageEvent) *Message {
 		if e == nil {
 			m.Channel.Name = c.Name
 		}
+	case UnknownType:
+		m.Type = UnknownType
+		c, e := o.WhereIs(ev.Channel)
+		if e == nil {
+			m.Channel.Name = c.Name
+		}
 	}
 	return m
 }
