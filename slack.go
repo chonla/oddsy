@@ -195,6 +195,8 @@ func (o *Oddsy) Start() {
 	slack.SetLogger(o.logger)
 	o.api.SetDebug(o.conf.Debug)
 
+	o.Name = o.conf.BotInfo.Name
+
 	o.rtm = o.api.NewRTM()
 	go o.rtm.ManageConnection()
 
@@ -206,7 +208,9 @@ func (o *Oddsy) Start() {
 
 		case *slack.ConnectedEvent:
 			o.uid = ev.Info.User.ID
-			o.Name = ev.Info.User.Name
+			if o.conf.BotInfo.Name == "" {
+				o.Name = ev.Info.User.Name
+			}
 
 		case *slack.MessageEvent:
 			m := NewMessage(o, ev)
