@@ -34,7 +34,7 @@ const (
 var userReg = regexp.MustCompile("<@(U[^>]+)>")
 
 // NewMessage parses slack message and wrap it
-func NewMessage(o *Oddsy, ev *slack.MessageEvent) *Message {
+func NewMessage(o I, ev *slack.MessageEvent) *Message {
 	var uName string
 	isBot := (ev.SubType == "bot_message")
 	if isBot {
@@ -51,7 +51,7 @@ func NewMessage(o *Oddsy, ev *slack.MessageEvent) *Message {
 		}
 	}
 	mentions := getMentionList(o, ev.Text)
-	mentioned := isMentioned(o.uid, mentions)
+	mentioned := isMentioned(o.UID(), mentions)
 
 	m := &Message{
 		From: Identity{
@@ -67,7 +67,7 @@ func NewMessage(o *Oddsy, ev *slack.MessageEvent) *Message {
 		IsBotMessage: isBot,
 	}
 
-	switch getMessageType(ev) {
+	switch getType(ev) {
 	case DirectType:
 		m.Channel.Name = "Direct Message"
 		m.Type = DirectType
@@ -81,7 +81,7 @@ func NewMessage(o *Oddsy, ev *slack.MessageEvent) *Message {
 	return m
 }
 
-func getMentionList(o *Oddsy, m string) []Identity {
+func getMentionList(o I, m string) []Identity {
 	list := userReg.FindAllStringSubmatch(m, -1)
 	ids := []Identity{}
 	for i, n := 0, len(list); i < n; i++ {
@@ -103,7 +103,7 @@ func isMentioned(id string, l []Identity) bool {
 	return false
 }
 
-func getMessageType(ev *slack.MessageEvent) MessageType {
+func getType(ev *slack.MessageEvent) MessageType {
 	switch ev.Channel[0:1] {
 	case "D":
 		return DirectType

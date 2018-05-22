@@ -10,6 +10,15 @@ import (
 	"github.com/nlopes/slack"
 )
 
+// I is interface of Oddsy
+type I interface {
+	WhoIs(id string) (u *slack.User, e error)
+	WhatBot(id string) (b *slack.Bot, e error)
+	WhereIs(id string) (c *slack.Channel, e error)
+	WhoAmI() (id string, name string)
+	UID() (id string)
+}
+
 // Oddsy is slack wrapper
 type Oddsy struct {
 	conf   *Configuration
@@ -100,6 +109,12 @@ func (o *Oddsy) WhereIs(id string) (c *slack.Channel, e error) {
 func (o *Oddsy) WhoAmI() (id string, name string) {
 	id = o.uid
 	name = o.Name
+	return
+}
+
+// UID returns just UID
+func (o *Oddsy) UID() (id string) {
+	id = o.uid
 	return
 }
 
