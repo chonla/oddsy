@@ -36,13 +36,16 @@ var userReg = regexp.MustCompile("<@(U[^>]+)>")
 // NewMessage parses slack message and wrap it
 func NewMessage(o I, ev *slack.MessageEvent) *Message {
 	var uName string
+	var uID string
 	isBot := (ev.SubType == "bot_message")
 	if isBot {
+		uID = ev.BotID
 		b, e := o.WhatBot(ev.BotID)
-		if e != nil {
+		if e == nil {
 			uName = b.Name
 		}
 	} else {
+		uID = ev.User
 		u, e := o.WhoIs(ev.User)
 		if e == nil {
 			uName = u.Name
@@ -56,7 +59,7 @@ func NewMessage(o I, ev *slack.MessageEvent) *Message {
 	m := &Message{
 		From: Identity{
 			Name: uName,
-			UID:  ev.User,
+			UID:  uID,
 		},
 		Message: ev.Text,
 		Channel: Identity{

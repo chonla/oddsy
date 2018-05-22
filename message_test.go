@@ -113,6 +113,49 @@ func TestShouldCreatePublicTypeMessage(t *testing.T) {
 	assert.Equal(t, expected, m)
 }
 
+func TestShouldCreateMessageFromBot(t *testing.T) {
+	ev := &slack.MessageEvent{
+		Msg: slack.Msg{
+			Channel: "C000000",
+			User:    "U1111",
+			Text:    "Some Message",
+			SubType: "bot_message",
+			BotID:   "B0001",
+		},
+	}
+	expected := &oddsy.Message{
+		From: oddsy.Identity{
+			UID:  ev.Msg.BotID,
+			Name: "Some Bot",
+		},
+		IsBotMessage: true,
+		Message:      ev.Msg.Text,
+		Channel: oddsy.Identity{
+			UID:  ev.Msg.Channel,
+			Name: "",
+		},
+		Type:        oddsy.PublicType,
+		Mentioned:   false,
+		MentionList: []oddsy.Identity{},
+	}
+
+	oddsyMock := new(MockedOddsy)
+	oddsyMock.On("UID").Return("U0000")
+	oddsyMock.On("WhatBot", ev.Msg.BotID).Return(&slack.Bot{
+		Name: "Some Bot",
+		ID:   ev.Msg.BotID,
+	}, nil)
+	oddsyMock.On("WhoIs", ev.Msg.User).Return(&slack.User{
+		Name: "Some Name",
+		ID:   ev.Msg.User,
+	}, nil)
+	oddsyMock.On("WhereIs", ev.Msg.Channel).Return(&slack.Channel{}, errors.New("Don't worry. I just don't know how to mock private things."))
+
+	m := oddsy.NewMessage(oddsyMock, ev)
+
+	assert.Equal(t, expected, m)
+}
+
 func TestShouldCreateUnknownTypeMessage(t *testing.T) {
 	ev := &slack.MessageEvent{
 		Msg: slack.Msg{
